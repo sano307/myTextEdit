@@ -3,6 +3,7 @@ package gitProject;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -549,15 +550,17 @@ class textGUI extends JFrame {
         jm_file.add(jmi_fileOpen);
         jmi_fileOpen.setAccelerator(KeyStroke.getKeyStroke('O', Event.CTRL_MASK));
         jmi_fileOpen.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 StringBuffer sb = new StringBuffer();
                 defaultPath.addChoosableFileFilter(selectExpansion);
                 defaultPath.showOpenDialog(textGUI.this);
 
                 try {
-                    BufferedReader transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
+                    BufferedReade
+ transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
 
+                    setTitle(defaultPath.getSelectedFile().getName());
+                    
                     while ( true ) {
                         String line = transientStorage.readLine();
 
@@ -576,7 +579,6 @@ class textGUI extends JFrame {
         jm_file.add(jmi_fileSave);
         jmi_fileSave.setAccelerator(KeyStroke.getKeyStroke('S', Event.CTRL_MASK));
         jmi_fileSave.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
 
             }
@@ -585,7 +587,6 @@ class textGUI extends JFrame {
         jm_file.add(jmi_fileSaveAs);
         jmi_fileSaveAs.setAccelerator(KeyStroke.getKeyStroke('A', Event.CTRL_MASK));
         jmi_fileSaveAs.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 defaultPath.addChoosableFileFilter(selectExpansion);
                 defaultPath.showSaveDialog(textGUI.this);
@@ -594,7 +595,7 @@ class textGUI extends JFrame {
                     String curText = textContents.getText();
                     StringBuffer sb = new StringBuffer(curText.length());
                     PrintWriter pw = new PrintWriter(defaultPath.getSelectedFile());
-
+                    
                     Scanner sc = new Scanner(curText);
 
                     for ( int i = 0; sc.hasNextLine(); i++ ) {
@@ -685,6 +686,6 @@ class textGUI extends JFrame {
 
 public class TextEx {
     public static void main(String[] args) {
-        new textGUI("My Own Text Editor");
+        new textGUI("제목 없음.txt");
     }
 }
