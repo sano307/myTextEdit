@@ -6,10 +6,44 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.*;
 import javax.swing.filechooser.*;
+
+class fontSettingFrame extends JPanel implements ActionListener {
+	textGUI mainFrame = new textGUI();
+	
+	public fontSettingFrame(){
+		this.setLayout(new FlowLayout());
+		this.setSize(250, 100);
+		//this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+		JLabel fontSize = new JLabel("Font Size : ");
+		JButton fontSizeSeleteBtn = new JButton("확인");
+		fontSizeSeleteBtn.addActionListener(this);
+
+		this.add(fontSize);
+		this.add(fontSizeSeleteBtn);
+		this.setVisible(true);
+	}
+
+	public void actionPerformed(ActionEvent ae){
+		mainFrame.getTextContentsFont();
+		this.setVisible(false);
+		//this.dispose();
+	}
+}
 
 class textGUI extends JFrame {
     TextArea 	textContents;			// 내용입력창
@@ -17,24 +51,44 @@ class textGUI extends JFrame {
     JLabel 		jl_select, jl_modify;	// 특정 단어 입력 구역에 쓰일 글자
     TextField   tf_select, tf_modify;	// 특정 단어 입력칸
     JMenuBar    jmb;                    // 메뉴바
-    JMenu       jm_file;                // 파일 메뉴
+    JMenu       jm_file, jm_option;     // 파일 메뉴, 옵션 메뉴
     JMenuItem
-            jmi_fileOpen,       // 파일 열기
-            jmi_fileSave,       // 파일 저장
-            jmi_fileSaveAs,
-            jmi_programExit;    // 프로그램 종료
+            jmi_fileOpen,       	// 파일 열기
+            jmi_fileSave,       	// 파일 저장
+            jmi_fileSaveAs,			// 즉시 저장
+            jmi_programExit,    	// 프로그램 종료
+    		jmi_fontSizeUp,			// 글자 크기 크게
+    		jmi_fontSizeDown,		// 글자 크기 작게
+    		jmi_fontSizeOriginal;	// 글자 크기 원래대로
     JFileChooser defaultPath = new JFileChooser("c:/");
     FileFilter selectExpansion = new FileNameExtensionFilter("텍스트 문서(*.txt)", "txt");
 
+    void getTextContentsFont() {
+    	try {
+    		System.out.println("Good");
+    		System.out.println(textContents.getFont());
+    		Font nowFontobj = textContents.getFont();
+    		textContents.setFont(new Font(nowFontobj.getFontName(), nowFontobj.getStyle(), 20));
+    	} catch (NullPointerException ne) {
+    		System.out.println("Cyka");
+    		ne.printStackTrace();
+    	}
+    }
+    
     // 옵션 버튼 이름
     String[] btnName = {
             "Undo",
-            "Delete_EvenLine",
-            "Delete_Letter",
-            "Delete_EmptyLine",
-            "Delete_EmptySpace",
-            "Insert_prefix",
-            "Delete_prefix",
+            "D_EvenLine",
+            "D_Letter",
+            "D_EmptyLine",
+            "D_EmptySpace",
+            "I_prefix",
+            "D_prefix",
+            "D_Specific_Prefix",
+            "D_OverlapLine",
+            "D_OverlapLine(num)",
+            "I_Specific_Prefix",
+            "D_Specific_Prefix",
     };
 
     // 옵션 버튼 객체
@@ -46,6 +100,10 @@ class textGUI extends JFrame {
     // 이전으로 가기버튼 등에 필요
     private String prevText = "";
 
+    textGUI() {
+    	
+    }
+    
     // 버튼에 액션리스너 장착 함수
     private void registerEventHandler() {
         int n = 0;
@@ -187,7 +245,7 @@ class textGUI extends JFrame {
             }
         });
 
-        // 라인마다 앞, 뒤에 있는 공간 없애기
+        // 라인마다 앞, 뒤에 있는 공간 삭제
         optionBtn[n++].addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 String curText = textContents.getText();
@@ -204,7 +262,7 @@ class textGUI extends JFrame {
             }
         });
 
-        // 라인마다 앞, 뒤에 입력한 문자 붙이기
+        // 라인마다 앞, 뒤에 입력한 문자 삽입
         optionBtn[n++].addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 String curText = textContents.getText();
@@ -231,56 +289,231 @@ class textGUI extends JFrame {
         // 라인마다 앞, 뒤에 입력한 문자가 있다면 삭제
         optionBtn[n++].addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                String curText = textContents.getText();
-                StringBuffer sb = new StringBuffer(curText.length());
-                prevText = curText;
+            	String curText = textContents.getText();
+            	StringBuffer sb = new StringBuffer(curText.length());
+            	prevText = curText;
+            	
+                // param1과 param2의 값을 가져온다.(getText()사용)
+            	String stringOfFront = tf_select.getText();
+            	String stringOfBack  = tf_modify.getText();
+            	
+                // Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
+            	Scanner sc = new Scanner(curText);
+            	
+            	for ( int i = 0; sc.hasNextLine(); i++ ) {
+            		String line = sc.nextLine();
+            		line = line.replaceAll("\t", "");
+            		
+            		// 읽어온 라인을 substring으로 자른다. - param1과 param2의 내용에 관계없이 길이만큼 자른다.
+            		line = line.substring(stringOfFront.length(), line.length() - stringOfBack.length());
+            		sb.append(line).append(CR_LF);
+            	}
 
-                Scanner sc = new Scanner(curText);
-                String param1 = tf_select.getText();
-                String param2 = tf_modify.getText();
-
-                for ( int i = 0; sc.hasNextLine(); i++ ) {
-                    String line = sc.nextLine();
-                    System.out.print("line : " + line);
-                    String temp = " ";
-                    String tempGapSpace = "";
-                    int selectNum = 0;
-
-                    while ( true ) {
-                        char ch = line.charAt(selectNum);
-                        if ( temp.indexOf(ch) == -1 ) {
-                            break;
-                        } else {
-                            selectNum++;
-                        }
-                    }
-
-                    line = line.trim();
-
-                    String beforeParam = line.substring(0, param1.length());
-                    System.out.print("beforeParam : " + beforeParam);
-                    String afterParam = line.substring(line.length() - param2.length());
-                    System.out.print("afterParam : " + afterParam);
-
-                    for ( int j = 0; j < selectNum; j++ ) {
-                        tempGapSpace += " ";
-                    }
-                    
-                    System.out.print("tempGapSpace : " + tempGapSpace);
-
-                    if ( beforeParam.equals(param1) && afterParam.equals(param2) ) {
-                    	System.out.print("line : " + line);
-                    	line = line.substring(param1.length(), line.length() - param2.length());
-                    	System.out.print("line : " + line);
-                        sb.append(tempGapSpace).append(line).append(CR_LF);
-                        System.out.println(sb);
-                    } else {
-                        sb.append(line).append(CR_LF);
-                        System.out.println("NO");
-                    }
-                }
-                textContents.setText(sb.toString());
+            	// 작업이 끝난 후에 sb에 담긴 내용을 ta에 보여준다.(setText()사용)
+            	textContents.setText(sb.toString());
             }
+        });
+        
+        // 특정 문자열 안에 속한 문자열 뽑아오기
+        optionBtn[n++].addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent ae) {
+        		String curText = textContents.getText();
+        		StringBuffer sb = new StringBuffer(curText.length());
+        		prevText = curText;
+
+        		// param1과 param2의 값을 가져온다.(getText()사용)
+        		String specificStringOfFront = tf_select.getText();
+        		String specificStringOfBack  = tf_modify.getText();
+        		
+        		// Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
+        		Scanner sc = new Scanner(curText);
+        		
+        		for ( int i = 0; sc.hasNextLine(); i++ ) {
+        			String line = sc.nextLine();
+        			
+        			// 각 라인에서 param1, param2과 일치하는 문자열의 위치를 찾는다.
+        			int from = line.indexOf(specificStringOfFront);
+        			int to   = line.lastIndexOf(specificStringOfBack);
+        			
+        			// (param1은 라인의 왼쪽끝부터, param2는 라인의 오른쪽끝부터 찾기 시작한다.)
+        			// 만약, 첫번째로 입력된 인자가 만족하는 문자가 발견되지 않는다면 0을 반환해주고,
+        			// 만족하는 문자가 발견된다면 해당 인자가 처음 발견된 문자의 위치에 그 인자의 길이를 더해준 값을 반환해준다.
+        			from = ( from == -1 ) ? 0 : from + specificStringOfFront.length();
+        			
+        			// 만약, 두번째로 입력된 인자가 만족하는 문자가 발견되지 않는다면 현재 라인 문자열의 자리수를 반환해주고,
+        			// 만족하는 문자가 발견된다면 해당 인자가 처음 발견된 문자 위치의 값을 반환해준다.
+        			to   = ( to == -1 ) ? line.length() : to;
+        			
+        			if ( from > to ) return;
+        			
+        			// param1과 param2로 둘러쌓인 부분을 sb에 저장한다.
+        			sb.append(line.substring(from, to)).append(CR_LF);
+        		}
+
+                // sb의 내용을 TextArea에 보여준다.
+        		textContents.setText(sb.toString());
+        	}
+        });
+        
+        // 중복 라인 제거
+        optionBtn[n++].addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent ae) {
+        		String curText = textContents.getText();
+        		StringBuffer sb = new StringBuffer(curText.length());
+        		prevText = curText;
+
+                // Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽어서 HashSet에 담는다.
+                Scanner sc = new Scanner(curText);
+                
+                HashSet lineList = new HashSet();
+                
+                for ( int i = 0; sc.hasNextLine(); i++ ) {
+                	String line = sc.nextLine();
+                	lineList.add(line);
+                }
+
+        		// HashSet의 내용을 ArrayList로 옮긴다음 정렬한다.(Collections의 sort()사용)
+                ArrayList distinctLineList = new ArrayList(lineList);
+                Collections.sort(distinctLineList);
+                
+                // 정렬된 ArrayList의 내용을 sb에 저장한다.
+                int listSize = distinctLineList.size();
+                
+                for ( int i = 0; i < listSize; i++ ) {
+                	sb.append(distinctLineList.get(i)).append(CR_LF);
+                }
+                
+                // sb에 저장된 내용을 TextArea에 보여준다.
+                textContents.setText(sb.toString());
+            } 
+        });
+        
+        // 중복 라인 제거 후 뒤에 중복된 수를 표시
+        optionBtn[n++].addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent ae) {
+        		String curText = textContents.getText();
+        		StringBuffer sb = new StringBuffer(curText.length());
+        		prevText = curText;
+        		
+                // Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽어서 TreeMap에 담는다.
+                Scanner sc = new Scanner(curText);
+                
+                TreeMap lineList = new TreeMap();
+                String delimiter = tf_select.getText();
+                
+                // 첫번째 입력란에 어떤 문자열을 입력했으면
+                // 그 문자열을 키와 값을 구분하는 구분자로 사용하고,
+                // 첫번째 입력란에 아무것도 입력하지 않았으면 콤마(,)를 구분자로 설정한다.
+                if ( delimiter.length() == 0 ) delimiter = ",";
+                
+                for ( int i = 0; sc.hasNextLine(); i++ ) {
+                	String line = sc.nextLine();
+                	
+                	// TreeMap에 담을 때, 각 라인을 키로 저장하고 값으로는 중복회수를 저장한다.
+                    // TreeMap에 담을 때, 이미 같은 내용의 값이 저장되어 있는지 확인하고
+                	if ( lineList.containsKey(line) ) {
+                		// 이미 같은 내용이 저장되어 있으면
+                		// 해당 키의 값을 읽어서
+                		Integer keyValueOfnowLine = (Integer)lineList.get(line);
+                		
+                		// 1을 증가시키고,
+                		lineList.put(line, new Integer(keyValueOfnowLine.intValue() + 1));
+                	} else {
+                		// 새로운 키값이면 1을 값으로 저장한다.
+                		lineList.put(line, new Integer(1));
+                	}
+                	System.out.println(lineList);
+                }
+                
+        		// Iterator를 이용해서 TreeMap에 저장된 키와 값을 구분자와 함께 sb에 저장한다.
+                // (TreeMap을 사용했기 때문에, 자동적으로 키값을 기준으로 오름차순 정렬된다.)
+                
+                // lineList에 저장되어 있는 모든 key-value쌍을
+                // Map.Entry Type의 객체로 반환
+                Set formOfSet = lineList.entrySet();
+                
+                // 컬렉션에 저장된 요소들을 읽어오는 클래스인
+                // Iterator Type의 객체로 반환
+                Iterator formOfIterator = formOfSet.iterator(); 
+
+                while( formOfIterator.hasNext() ) { 
+                	// formOfIterator에 저장되어 있는 요소들을 차례대로 읽어와서
+                	// Map.Entry Type의 객체의 참조변수로 넣어주고,
+                	Map.Entry me_obj = (Map.Entry)formOfIterator.next(); 
+
+                	// key와 value중에 value값을 불러와서 value라는 int형 변수에 넣어준다.
+                    int value = ((Integer)me_obj.getValue()).intValue(); 
+
+                    sb.append(me_obj.getKey());	// StringBuffer에 key에 들어있는 문자,
+                    sb.append(delimiter); 		// 구분자,
+                    sb.append(value);			// key에 들어있는 문자가 반복된 수,
+                    sb.append(CR_LF); 			// 마지막으로 개행문자를 넣어주어 enter키를 친 효과를 준다.
+                } 
+
+        		// sb에 저장된 내용을 TextArea에 보여준다.
+                textContents.setText(sb.toString());
+        	}
+        });
+        
+        // 구분자로 구분된 문자열들을 특정 패턴에 맞게 출력
+        optionBtn[n++].addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) { 
+            	String curText = textContents.getText(); 
+            	StringBuffer sb = new StringBuffer(curText.length()); 
+            	prevText = curText; 
+                  
+            	String pattern = tf_select.getText(); 
+            	String delimiter = tf_modify.getText(); 
+
+            	if( delimiter.length() == 0 ) delimiter = ","; 
+
+            	// Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
+            	Scanner sc = new Scanner(curText);
+                  
+            	for ( int i = 0; sc.hasNextLine(); i++ ) {
+            		String line = sc.nextLine();
+                	  
+            		// 라인을 구분자(delimiter)로 나누어 문자열 배열에 저장한다.
+            		String[] nowLineStr = line.split(delimiter);
+                	  
+                	// 첫번째 입력란에 입력받은 pattern을 각 라인에 적용해서 sb에 저장한다.
+            		// 데이터가 들어갈 자리를 마련해 놓은 양식을 미리 작성하여
+            		// 데이터를 정해진 양식에 맞게 바꿔서 출력해주는 메서드인 MessageFormat클래스의 format메서드를 사용
+                	sb.append(MessageFormat.format(pattern, nowLineStr)).append(CR_LF);
+            	}
+            	
+                // sb의 내용을 TextArea에 보여준다.
+            	textContents.setText(sb.toString());
+            }
+        });
+        
+        // 
+        optionBtn[n++].addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent ae) { 
+                  String curText = textContents.getText(); 
+                  StringBuffer sb = new StringBuffer(curText.length()); 
+                  prevText = curText; 
+
+                  String pattern = tf_select.getText(); 
+                  String delimiter = tf_modify.getText(); 
+
+                  Pattern p = Pattern.compile(pattern); 
+
+                  if(delimiter.length()==0) delimiter = ","; 
+                  
+                  // Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
+                  Scanner sc = new Scanner(curText);
+                  
+                  for ( int i = 0; sc.hasNextLine(); i++ ) {
+                	  String line = sc.nextLine();
+                	  
+                	  Matcher m = p.matcher(line);
+                	  
+                  }
+                  // 각 라인을 pattern에 맞게 매칭시킨다.(Pattern클래스의 matcher()사용)
+                  // pattern에 매칭되는 데이터를 구분자와 함께 sb에 저장한다.
+                  // sb의 내용을 TextArea에 보여준다.
+            } 
         });
     }
 
@@ -292,7 +525,13 @@ class textGUI extends JFrame {
         jmi_fileSave = new JMenuItem("Save");
         jmi_fileSaveAs = new JMenuItem("Save as...");
         jmi_programExit = new JMenuItem("Exit");
+        jm_option = new JMenu("Option");
+        jmi_fontSizeUp = new JMenuItem("Font Size Up");
+        jmi_fontSizeDown = new JMenuItem("Font Size Down");
+        jmi_fontSizeOriginal = new JMenuItem("Font Size Original");
+        
         textContents = new TextArea();
+        
         jp_North = new JPanel();
         jl_select = new JLabel("Select : ", JLabel.RIGHT);
         tf_select = new TextField(15);
@@ -306,7 +545,9 @@ class textGUI extends JFrame {
 
         setJMenuBar(jmb);
         jmb.add(jm_file);
+        jmb.add(jm_option);
         jm_file.add(jmi_fileOpen);
+        jmi_fileOpen.setAccelerator(KeyStroke.getKeyStroke('O', Event.CTRL_MASK));
         jmi_fileOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -333,6 +574,7 @@ class textGUI extends JFrame {
         });
 
         jm_file.add(jmi_fileSave);
+        jmi_fileSave.setAccelerator(KeyStroke.getKeyStroke('S', Event.CTRL_MASK));
         jmi_fileSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -341,12 +583,13 @@ class textGUI extends JFrame {
         });
 
         jm_file.add(jmi_fileSaveAs);
+        jmi_fileSaveAs.setAccelerator(KeyStroke.getKeyStroke('A', Event.CTRL_MASK));
         jmi_fileSaveAs.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 defaultPath.addChoosableFileFilter(selectExpansion);
                 defaultPath.showSaveDialog(textGUI.this);
-
+                
                 try {
                     String curText = textContents.getText();
                     StringBuffer sb = new StringBuffer(curText.length());
@@ -365,14 +608,48 @@ class textGUI extends JFrame {
                 }
             }
         });
+        
         jm_file.addSeparator();
 
         jm_file.add(jmi_programExit);
+        jmi_programExit.setAccelerator(KeyStroke.getKeyStroke('E', Event.CTRL_MASK));
         jmi_programExit.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
+        });
+        
+        jm_option.add(jmi_fontSizeUp);
+        jmi_fontSizeUp.setAccelerator(KeyStroke.getKeyStroke('Q', Event.ALT_MASK));
+        jmi_fontSizeUp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Font nowFontInfo = textContents.getFont();
+				textContents.setFont(new Font(nowFontInfo.getFontName(), nowFontInfo.getStyle(), nowFontInfo.getSize() + 1));
+				revalidate();
+				repaint();
+			}
+        });
+        
+        jm_option.add(jmi_fontSizeDown);
+        jmi_fontSizeDown.setAccelerator(KeyStroke.getKeyStroke('W', Event.ALT_MASK));
+        jmi_fontSizeDown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Font nowFontInfo = textContents.getFont();
+				textContents.setFont(new Font(nowFontInfo.getFontName(), nowFontInfo.getStyle(), nowFontInfo.getSize() - 1));
+				revalidate();
+				repaint();
+			}
+        });
+        
+        jm_option.add(jmi_fontSizeOriginal);
+        jmi_fontSizeOriginal.setAccelerator(KeyStroke.getKeyStroke('E', Event.ALT_MASK));
+        jmi_fontSizeOriginal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Font nowFontInfo = textContents.getFont();
+				textContents.setFont(new Font(nowFontInfo.getFontName(), nowFontInfo.getStyle(), 12));
+				revalidate();
+				repaint();
+			}
         });
 
         jp_North.setLayout(new FlowLayout());
@@ -391,7 +668,15 @@ class textGUI extends JFrame {
         add(textContents, "Center");
         add(jp_South, "South");
 
-        setBounds(100, 100, 600, 300);
+        // frame이 모니터 중앙에 위치하게 하기
+        Toolkit tk = Toolkit.getDefaultToolkit();	// 구현된 Toolkit객체를 얻는다. 
+        Dimension screenSize = tk.getScreenSize();	// 화면의 크기를 구한다.
+        
+        setSize(600, 300);
+        int x = screenSize.width / 2 - this.getWidth() / 2;  
+        int y = screenSize.height / 2 - this.getHeight() / 2;  
+                 
+        setLocation(x, y);
         textContents.requestFocus();
         registerEventHandler();
         setVisible(true);
