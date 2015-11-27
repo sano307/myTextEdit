@@ -71,7 +71,7 @@ public class DBProcessing {
 	public boolean isMemberCheck(String argID) {
 		DBConnection();
 		
-		String sql = "SELECT * FROM member WHERE m_id = ? AND m_pass = ?";
+		String sql = "SELECT * FROM member WHERE m_id = ?";
 		
 		try {
 			pstmp = db_conn.prepareStatement(sql);
