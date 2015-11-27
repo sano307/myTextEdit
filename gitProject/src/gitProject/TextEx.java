@@ -556,8 +556,7 @@ class textGUI extends JFrame {
                 defaultPath.showOpenDialog(textGUI.this);
 
                 try {
-                    BufferedReade
- transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
+                    BufferedReader transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
 
                     setTitle(defaultPath.getSelectedFile().getName());
                     
