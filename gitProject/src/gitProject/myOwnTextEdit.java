@@ -688,6 +688,7 @@ class textEditPage extends JFrame {
         jm_option.add(jmi_logout);
         jmi_logout.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
+        		textContents.setText(" ");
         		setVisible(false);
         		startPage start = startPage.getInstance();
         		start.setVisible(true);
@@ -825,6 +826,13 @@ class startPage extends JFrame implements ActionListener {
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			} else {
+				JOptionPane.showMessageDialog(this,
+						"정상적으로 로그인되었습니다!",
+						"login complete!",
+						JOptionPane.INFORMATION_MESSAGE);
+				
+				jtf_memberId.setText(null);;
+				jpf_memberPass.setText(null);
 				this.setVisible(false);
 				textEditPage textEdit = textEditPage.getInstance();
 				textEdit.setVisible(true);
@@ -833,6 +841,8 @@ class startPage extends JFrame implements ActionListener {
 			break;
 			
 		case "signUp":
+			jtf_memberId.setText(null);;
+			jpf_memberPass.setText(null);
 			this.setVisible(false);
 			signUpPage signUp = signUpPage.getInstance();
 			signUp.setVisible(true);
@@ -924,11 +934,19 @@ class signUpPage extends JFrame implements ActionListener {
 			String memberId = jtf_insertId.getText().trim();
 			char[] memberPassArr = jpf_insertPass.getPassword();
 			String memberPass = new String(memberPassArr, 0, memberPassArr.length);
+			memberPass.replaceAll("\u0020", "&nbsp;");
+			System.out.println(memberPass);
 			
-			if ( memberId.length() == 0 || memberPass.length() == 0 || memberPass.indexOf("\\s") != -1 ) {
+			if ( memberId.length() == 0 || memberPass.length() == 0 ) {
 				JOptionPane.showMessageDialog(this,
 					    "ID나 PassWord를 공란으로 비워두시면 안됩니다!",
 					    "ID, Password 공란 오류",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			} else if ( memberPass.indexOf(" ") != -1 ) {
+				JOptionPane.showMessageDialog(this,
+					    "PassWord란에 스패이스바를 입력하시면 안됩니다.",
+					    "Password Space Bar 입력 오류",
 					    JOptionPane.ERROR_MESSAGE);
 				return;
 			}
@@ -946,6 +964,9 @@ class signUpPage extends JFrame implements ActionListener {
 				} else {
 					JOptionPane.showMessageDialog(this,
 						    "정상적으로 회원가입이 완료되었습니다!");
+					
+					jtf_insertId.setText(null);
+					jpf_insertPass.setText(null);
 					this.setVisible(false);
 					startPage start = startPage.getInstance();
 					start.setVisible(true);
@@ -959,6 +980,8 @@ class signUpPage extends JFrame implements ActionListener {
 			break;
 			
 		case "previous":
+			jtf_insertId.setText(null);
+			jpf_insertPass.setText(null);
 			this.setVisible(false);
 			startPage start = startPage.getInstance();
 			start.setVisible(true);
