@@ -21,7 +21,16 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.filechooser.*;
 
-class textGUI extends JFrame {
+class textEditPage extends JFrame {
+	private static textEditPage textEditPageInstance;
+	
+	public static textEditPage getInstance() {
+        if (textEditPageInstance == null)
+        	textEditPageInstance = new textEditPage("제목 없음.txt");
+
+        return textEditPageInstance;
+    }
+	
     TextArea 	textContents;			// 내용입력창
     JPanel 		jp_North, jp_South;		// 특정 단어 입력 구역과 옵션 버튼 구역
     JLabel 		jl_select, jl_modify;	// 특정 단어 입력 구역에 쓰일 글자
@@ -66,10 +75,6 @@ class textGUI extends JFrame {
 
     // 이전으로 가기버튼 등에 필요
     private String prevText = "";
-
-    textGUI() {
-    	
-    }
     
     // 버튼에 액션리스너 장착 함수
     private void registerEventHandler() {
@@ -485,7 +490,7 @@ class textGUI extends JFrame {
         });
     }
 
-    textGUI(String title) {
+    textEditPage(String title) {
         super(title);
         jmb = new JMenuBar();
         jm_file = new JMenu("File");
@@ -525,7 +530,7 @@ class textGUI extends JFrame {
 				if ( textContents.getText().length() != 0 ) {
 					System.out.println(textContents.getText());
 	                defaultPath.addChoosableFileFilter(selectExpansion);
-	                defaultPath.showSaveDialog(textGUI.this);
+	                defaultPath.showSaveDialog(textEditPage.this);
 	                
 	                try {
 	                    String curText = textContents.getText();
@@ -558,7 +563,7 @@ class textGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 StringBuffer sb = new StringBuffer();
                 defaultPath.addChoosableFileFilter(selectExpansion);
-                defaultPath.showOpenDialog(textGUI.this);
+                defaultPath.showOpenDialog(textEditPage.this);
 
                 try {
                     BufferedReader transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
@@ -585,7 +590,7 @@ class textGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
             	if ( defaultPath.getSelectedFile().getName().length() == 0 ) {
                     defaultPath.addChoosableFileFilter(selectExpansion);
-                    defaultPath.showSaveDialog(textGUI.this);
+                    defaultPath.showSaveDialog(textEditPage.this);
                     
                     try {
                         String curText = textContents.getText();
@@ -614,7 +619,7 @@ class textGUI extends JFrame {
         jmi_fileSaveAs.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 defaultPath.addChoosableFileFilter(selectExpansion);
-                defaultPath.showSaveDialog(textGUI.this);
+                defaultPath.showSaveDialog(textEditPage.this);
                 
                 try {
                     String curText = textContents.getText();
@@ -684,7 +689,8 @@ class textGUI extends JFrame {
         jmi_logout.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		setVisible(false);
-        		new startPage("환영합니다!");
+        		startPage start = startPage.getInstance();
+        		start.setVisible(true);
         	}
         });
 
@@ -720,6 +726,15 @@ class textGUI extends JFrame {
 }
 
 class startPage extends JFrame implements ActionListener {
+	private static startPage startPageInstance;
+	
+	public static startPage getInstance() {
+        if (startPageInstance == null)
+        	startPageInstance = new startPage("환영합니다!");
+
+        return startPageInstance;
+    }
+	
 	JPanel
 		jp_viewOfProjectName,
 		jp_insertMemberInfo,
@@ -784,17 +799,16 @@ class startPage extends JFrame implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		String argAction = e.getActionCommand();
-		DBProcessing db_conn = new DBProcessing();
 
 		switch ( argAction ) {
 		case "login":
-			db_conn.DBConnection();
+			DBProcessing db_conn = new DBProcessing();
+			
 			String memberId = jtf_memberId.getText();
 			char[] memberPassArr = jpf_memberPass.getPassword();
 			String memberPass = new String(memberPassArr, 0, memberPassArr.length);
 			
 			boolean result = db_conn.isMemberCheck(memberId, memberPass);
-			db_conn.DBDisConnection();
 			
 			if ( !result ) {
 				result = db_conn.isMemberCheck(memberId);
@@ -812,20 +826,31 @@ class startPage extends JFrame implements ActionListener {
 				}
 			} else {
 				this.setVisible(false);
-				new textGUI("제목 없음.txt");
+				textEditPage textEdit = textEditPage.getInstance();
+				textEdit.setVisible(true);
 			}
 			
 			break;
 			
 		case "signUp":
 			this.setVisible(false);
-			new signUpPage("회원가입");
+			signUpPage signUp = signUpPage.getInstance();
+			signUp.setVisible(true);
 			break;
 		}
 	}
 }
 
 class signUpPage extends JFrame implements ActionListener {
+	private static signUpPage signUpPageInstance;
+	
+	public static signUpPage getInstance() {
+        if (signUpPageInstance == null)
+        	signUpPageInstance = new signUpPage("회원가입");
+
+        return signUpPageInstance;
+    }
+	
 	JPanel
 		jp_title,
 		jp_info,
@@ -845,7 +870,7 @@ class signUpPage extends JFrame implements ActionListener {
 	JButton
 		jb_submit,
 		jb_previous;
-	
+
 	signUpPage(String title) {
 		super(title);
 		
@@ -891,13 +916,22 @@ class signUpPage extends JFrame implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		String argAction = e.getActionCommand();
-		DBProcessing db_conn = new DBProcessing();
 		
 		switch ( argAction ) {
 		case "confirm":
-			String memberId = jtf_insertId.getText();
+			DBProcessing db_conn = new DBProcessing();
+			
+			String memberId = jtf_insertId.getText().trim();
 			char[] memberPassArr = jpf_insertPass.getPassword();
 			String memberPass = new String(memberPassArr, 0, memberPassArr.length);
+			
+			if ( memberId.length() == 0 || memberPass.length() == 0 || memberPass.indexOf("\\s") != -1 ) {
+				JOptionPane.showMessageDialog(this,
+					    "ID나 PassWord를 공란으로 비워두시면 안됩니다!",
+					    "ID, Password 공란 오류",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			
 			boolean result = db_conn.isMemberCheck(memberId);
 			
@@ -913,7 +947,8 @@ class signUpPage extends JFrame implements ActionListener {
 					JOptionPane.showMessageDialog(this,
 						    "정상적으로 회원가입이 완료되었습니다!");
 					this.setVisible(false);
-					new startPage("환영합니다!");
+					startPage start = startPage.getInstance();
+					start.setVisible(true);
 				}
 			} else {
 				JOptionPane.showMessageDialog(this,
@@ -925,7 +960,8 @@ class signUpPage extends JFrame implements ActionListener {
 			
 		case "previous":
 			this.setVisible(false);
-			new startPage("환영합니다!");
+			startPage start = startPage.getInstance();
+			start.setVisible(true);
 			break;
 		}
 	}
@@ -933,6 +969,6 @@ class signUpPage extends JFrame implements ActionListener {
 
 public class myOwnTextEdit {
 	public static void main(String[] args) {
-		new startPage("환영합니다!");
+		startPage.getInstance();
     }
 }
