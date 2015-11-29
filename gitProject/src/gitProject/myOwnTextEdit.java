@@ -674,6 +674,7 @@ class textEditPage extends JFrame {
             			JOptionPane.WARNING_MESSAGE);
             	
             	if ( exitCheck == JOptionPane.YES_OPTION ) {
+            		dispose();
             		System.exit(0);
             	} else {
             		return;
@@ -767,6 +768,7 @@ class textEditPage extends JFrame {
         			JOptionPane.WARNING_MESSAGE);
         	
         	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		dispose();
         		System.exit(0);
         	} else {
         		return;
@@ -851,6 +853,7 @@ class startPage extends JFrame implements ActionListener {
         			JOptionPane.WARNING_MESSAGE);
         	
         	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		dispose();
         		System.exit(0);
         	} else {
         		return;
@@ -900,7 +903,7 @@ class startPage extends JFrame implements ActionListener {
 				
 				jtf_memberId.setText(null);;
 				jpf_memberPass.setText(null);
-				this.dispose();
+				dispose();
 				new textEditPage("제목 없음.txt");
 			}
 			
@@ -909,7 +912,7 @@ class startPage extends JFrame implements ActionListener {
 		case "signUp":
 			jtf_memberId.setText(null);;
 			jpf_memberPass.setText(null);
-			this.dispose();
+			dispose();
 			new signUpPage("회원가입");
 			break;
 		}
@@ -993,6 +996,7 @@ class signUpPage extends JFrame implements ActionListener {
         			JOptionPane.WARNING_MESSAGE);
         	
         	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		dispose();
         		System.exit(0);
         	} else {
         		return;
@@ -1042,7 +1046,7 @@ class signUpPage extends JFrame implements ActionListener {
 					
 					jtf_insertId.setText(null);
 					jpf_insertPass.setText(null);
-					this.dispose();
+					dispose();
 					new startPage("My Own Text Edit");
 				}
 			} else {
@@ -1056,7 +1060,7 @@ class signUpPage extends JFrame implements ActionListener {
 		case "previous":
 			jtf_insertId.setText(null);
 			jpf_insertPass.setText(null);
-			this.dispose();
+			dispose();
 			new startPage("My Own Text Edit");
 			break;
 		}
