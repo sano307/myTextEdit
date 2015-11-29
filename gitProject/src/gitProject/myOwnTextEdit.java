@@ -667,7 +667,17 @@ class textEditPage extends JFrame {
         jmi_programExit.setAccelerator(KeyStroke.getKeyStroke('E', Event.CTRL_MASK));
         jmi_programExit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+            	int exitCheck = JOptionPane.showConfirmDialog(null,
+            			"종료하시겠습니까?",
+            			"My Own Text Edit",
+            			JOptionPane.YES_NO_OPTION,
+            			JOptionPane.WARNING_MESSAGE);
+            	
+            	if ( exitCheck == JOptionPane.YES_OPTION ) {
+            		System.exit(0);
+            	} else {
+            		return;
+            	}
             }
         });
         
@@ -698,7 +708,7 @@ class textEditPage extends JFrame {
         jmi_fontSizeOriginal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Font nowFontInfo = textContents.getFont();
-				textContents.setFont(new Font(nowFontInfo.getFontName(), nowFontInfo.getStyle(), 12));
+				textContents.setFont(new Font(nowFontInfo.getFontName(), nowFontInfo.getStyle(), 20));
 				revalidate();
 				repaint();
 			}
@@ -740,9 +750,28 @@ class textEditPage extends JFrame {
         int y = screenSize.height / 2 - this.getHeight() / 2;  
                  
         setLocation(x, y);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         textContents.requestFocus();
         registerEventHandler();
         setVisible(true);
+    }
+    
+    protected void processWindowEvent(WindowEvent e) {
+    	super.processWindowEvent(e);
+    	
+    	if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+        	int exitCheck = JOptionPane.showConfirmDialog(null,
+        			"종료하시겠습니까?",
+        			"My Own Text Edit",
+        			JOptionPane.YES_NO_OPTION,
+        			JOptionPane.WARNING_MESSAGE);
+        	
+        	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		System.exit(0);
+        	} else {
+        		return;
+        	}
+    	}
     }
 }
 
@@ -806,8 +835,28 @@ class startPage extends JFrame implements ActionListener {
         int y = screenSize.height / 2 - this.getHeight() / 2;  
                  
         setLocation(x, y);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setResizable(false);
         setVisible(true);
 	}
+	
+    public void processWindowEvent(WindowEvent e) {
+    	super.processWindowEvent(e);
+    	
+    	if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+        	int exitCheck = JOptionPane.showConfirmDialog(null,
+        			"종료하시겠습니까?",
+        			"My Own Text Edit",
+        			JOptionPane.YES_NO_OPTION,
+        			JOptionPane.WARNING_MESSAGE);
+        	
+        	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		System.exit(0);
+        	} else {
+        		return;
+        	}
+    	}
+    }
 
 	public void actionPerformed(ActionEvent e) {
 		String argAction = e.getActionCommand();
@@ -928,8 +977,28 @@ class signUpPage extends JFrame implements ActionListener {
         int y = screenSize.height / 2 - this.getHeight() / 2;  
                  
         setLocation(x, y);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setResizable(false);
         setVisible(true);
 	}
+	
+    protected void processWindowEvent(WindowEvent e) {
+    	super.processWindowEvent(e);
+    	
+    	if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+        	int exitCheck = JOptionPane.showConfirmDialog(null,
+        			"종료하시겠습니까?",
+        			"My Own Text Edit",
+        			JOptionPane.YES_NO_OPTION,
+        			JOptionPane.WARNING_MESSAGE);
+        	
+        	if ( exitCheck == JOptionPane.YES_OPTION ) {
+        		System.exit(0);
+        	} else {
+        		return;
+        	}
+    	}
+    }
 
 	public void actionPerformed(ActionEvent e) {
 		String argAction = e.getActionCommand();
