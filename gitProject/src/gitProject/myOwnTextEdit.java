@@ -22,19 +22,10 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 
 class textEditPage extends JFrame {
-	private static textEditPage textEditPageInstance;
-	
-	public static textEditPage getInstance() {
-        if (textEditPageInstance == null)
-        	textEditPageInstance = new textEditPage("제목 없음.txt");
-
-        return textEditPageInstance;
-    }
-	
     TextArea 	textContents;			// 내용입력창
     JPanel 		jp_North, jp_South;		// 특정 단어 입력 구역과 옵션 버튼 구역
-    JLabel 		jl_select, jl_modify;	// 특정 단어 입력 구역에 쓰일 글자
-    TextField   tf_select, tf_modify;	// 특정 단어 입력칸
+    JLabel 		jl_arg1, jl_arg2;		// 특정 단어 입력 구역에 쓰일 글자
+    TextField   tf_arg1, tf_arg2;		// 특정 단어 입력칸
     JMenuBar    jmb;                    // 메뉴바
     JMenu       jm_file, jm_option;     // 파일 메뉴, 옵션 메뉴
     JMenuItem
@@ -48,21 +39,24 @@ class textEditPage extends JFrame {
     		jmi_fontSizeOriginal,	// 글자 크기 원래대로
     		jmi_logout;				// 로그아웃
     
+    // 파일을 열거나 저장할 때 뜨는 탐색기 창의 경로 설정
     JFileChooser defaultPath = new JFileChooser("c:/");
+    
+    // 탐색기에서 원하는 확장자만 볼 수 있게 해주는 옵션
     FileFilter selectExpansion = new FileNameExtensionFilter("텍스트 문서(*.txt)", "txt");
     
     // 옵션 버튼 이름
     String[] btnName = {
-            "Undo",
-            "D_EvenLine",
-            "D_Letter",
-            "D_EmptyLine",
-            "D_EmptySpace",
-            "I_prefix",
-            "D_prefix",
-            "D_Specific_Prefix",
-            "D_OverlapLine",
-            "D_OverlapLine(num)",
+            "이전으로",
+            "짝수줄제거",
+            "특정단어제거",
+            "빈 라인 제거",
+            "빈 공간 제거",
+            "패턴 추가",
+            "패턴 제거",
+            "특정 부분빼고 제거",
+            "중복 라인 제거",
+            "중복 라인 제거(숫자)",
             "I_Specific_Prefix",
             "D_Specific_Prefix",
     };
@@ -144,7 +138,7 @@ class textEditPage extends JFrame {
                 prevText = curText;
 
                 // tf_select에 입력된 문자열을 deleteText에 대입
-                String deleteText = tf_select.getText();
+                String deleteText = tf_arg1.getText();
                 StringBuffer temp = new StringBuffer();
 
                 // 만약, deleteText에 값이 없다면 액션이벤트 종료
@@ -241,8 +235,8 @@ class textEditPage extends JFrame {
                 StringBuffer sb = new StringBuffer(curText.length());
                 prevText = curText;
 
-                String param1 = tf_select.getText();
-                String param2 = tf_modify.getText();
+                String param1 = tf_arg1.getText();
+                String param2 = tf_arg2.getText();
 
                 Scanner sc = new Scanner(curText);
 
@@ -266,8 +260,8 @@ class textEditPage extends JFrame {
             	prevText = curText;
             	
                 // param1과 param2의 값을 가져온다.(getText()사용)
-            	String stringOfFront = tf_select.getText();
-            	String stringOfBack  = tf_modify.getText();
+            	String stringOfFront = tf_arg1.getText();
+            	String stringOfBack  = tf_arg2.getText();
             	
                 // Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
             	Scanner sc = new Scanner(curText);
@@ -294,8 +288,8 @@ class textEditPage extends JFrame {
         		prevText = curText;
 
         		// param1과 param2의 값을 가져온다.(getText()사용)
-        		String specificStringOfFront = tf_select.getText();
-        		String specificStringOfBack  = tf_modify.getText();
+        		String specificStringOfFront = tf_arg1.getText();
+        		String specificStringOfBack  = tf_arg2.getText();
         		
         		// Scanner클래스와 반복문을 이용해서 curText를 라인단위로 읽는다.
         		Scanner sc = new Scanner(curText);
@@ -371,7 +365,7 @@ class textEditPage extends JFrame {
                 Scanner sc = new Scanner(curText);
                 
                 TreeMap lineList = new TreeMap();
-                String delimiter = tf_select.getText();
+                String delimiter = tf_arg1.getText();
                 
                 // 첫번째 입력란에 어떤 문자열을 입력했으면
                 // 그 문자열을 키와 값을 구분하는 구분자로 사용하고,
@@ -434,8 +428,8 @@ class textEditPage extends JFrame {
             	StringBuffer sb = new StringBuffer(curText.length()); 
             	prevText = curText; 
                   
-            	String pattern = tf_select.getText(); 
-            	String delimiter = tf_modify.getText(); 
+            	String pattern = tf_arg1.getText(); 
+            	String delimiter = tf_arg2.getText(); 
 
             	if( delimiter.length() == 0 ) delimiter = ","; 
 
@@ -466,8 +460,8 @@ class textEditPage extends JFrame {
                   StringBuffer sb = new StringBuffer(curText.length()); 
                   prevText = curText; 
 
-                  String pattern = tf_select.getText(); 
-                  String delimiter = tf_modify.getText(); 
+                  String pattern = tf_arg1.getText(); 
+                  String delimiter = tf_arg2.getText(); 
 
                   Pattern p = Pattern.compile(pattern); 
 
@@ -492,6 +486,7 @@ class textEditPage extends JFrame {
 
     textEditPage(String title) {
         super(title);
+        
         jmb = new JMenuBar();
         jm_file = new JMenu("File");
         jmi_fileNew = new JMenuItem("New");
@@ -508,10 +503,10 @@ class textEditPage extends JFrame {
         textContents = new TextArea();
         
         jp_North = new JPanel();
-        jl_select = new JLabel("Select : ", JLabel.RIGHT);
-        tf_select = new TextField(15);
-        jl_modify = new JLabel("modify : ", JLabel.RIGHT);
-        tf_modify = new TextField(15);
+        jl_arg1 = new JLabel("arg1 : ", JLabel.RIGHT);
+        tf_arg1 = new TextField(15);
+        jl_arg2 = new JLabel("arg2 : ", JLabel.RIGHT);
+        tf_arg2 = new TextField(15);
         jp_South = new JPanel();
 
         for ( int i = 0; i < optionBtn.length; i++ ) {
@@ -550,8 +545,10 @@ class textEditPage extends JFrame {
 	                }
 				}
 				
+				defaultPath.getSelectedFile().delete();
+				System.out.println(defaultPath.getSelectedFile().getName());
 				textContents.setText(null);
-				setTitle(title);
+				setTitle("제목 없음.txt");
 			}
         });
         
@@ -569,14 +566,21 @@ class textEditPage extends JFrame {
                     BufferedReader transientStorage = new BufferedReader(new FileReader(defaultPath.getSelectedFile()));
 
                     while ( true ) {
+                    	// 한 줄을 읽어서 문자열 객체에 저장한다.
                         String line = transientStorage.readLine();
 
+                        // 만약, 현재줄에 아무것도 쓰여져 있지않다면, 반복문을 빠져나간다.
                         if ( line == null ) break;
 
+                        // 현재줄에 뭔가 쓰여져 있다면, StringBuffer에 현재 줄을 추가하고 개행문자로 한 줄 띄워준다.
                         sb.append(line).append(CR_LF);
                     }
 
+                    // 읽어온 파일의 라인을 다 StringBuffer에 입력했다면,
+                    // 현재 창의 타이틀을 파일이름으로 고치고
                     setTitle(defaultPath.getSelectedFile().getName());
+                    
+                    // textArea에 StringBuffer에 기록된 문자열들을 삽입한다.
                     textContents.setText(sb.toString());
                 } catch (IOException ie) {
                     ie.printStackTrace();
@@ -588,7 +592,8 @@ class textEditPage extends JFrame {
         jmi_fileSave.setAccelerator(KeyStroke.getKeyStroke('S', Event.CTRL_MASK));
         jmi_fileSave.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	if ( defaultPath.getSelectedFile().getName().length() == 0 ) {
+            	if ( defaultPath.getSelectedFile() == null ) {
+            		System.out.println("Cyka");
                     defaultPath.addChoosableFileFilter(selectExpansion);
                     defaultPath.showSaveDialog(textEditPage.this);
                     
@@ -605,11 +610,28 @@ class textEditPage extends JFrame {
                         }
 
                         pw.close();
+                        
+                        setTitle(defaultPath.getSelectedFile().getName());
                     } catch (IOException ie) {
                         ie.printStackTrace();
                     }
             	} else {
-            		
+            		System.out.println(defaultPath.getSelectedFile().getName());
+                    try {
+                        String curText = textContents.getText();
+                        PrintWriter pw = new PrintWriter(defaultPath.getSelectedFile());
+
+                        Scanner sc = new Scanner(curText);
+
+                        for ( int i = 0; sc.hasNextLine(); i++ ) {
+                            String line = sc.nextLine();
+                            pw.println(line);
+                        }
+
+                        pw.close();
+                    } catch (IOException ie) {
+                        ie.printStackTrace();
+                    }
             	}
             }
         });
@@ -623,7 +645,6 @@ class textEditPage extends JFrame {
                 
                 try {
                     String curText = textContents.getText();
-                    StringBuffer sb = new StringBuffer(curText.length());
                     PrintWriter pw = new PrintWriter(defaultPath.getSelectedFile());
 
                     Scanner sc = new Scanner(curText);
@@ -689,17 +710,16 @@ class textEditPage extends JFrame {
         jmi_logout.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		textContents.setText(" ");
-        		setVisible(false);
-        		startPage start = startPage.getInstance();
-        		start.setVisible(true);
+        		dispose();
+        		new startPage("My Own Text Edit");
         	}
         });
 
         jp_North.setLayout(new FlowLayout());
-        jp_North.add(jl_select);
-        jp_North.add(tf_select);
-        jp_North.add(jl_modify);
-        jp_North.add(tf_modify);
+        jp_North.add(jl_arg1);
+        jp_North.add(tf_arg1);
+        jp_North.add(jl_arg2);
+        jp_North.add(tf_arg2);
 
         jp_South.setLayout(new GridLayout(2, 10));
 
@@ -727,15 +747,6 @@ class textEditPage extends JFrame {
 }
 
 class startPage extends JFrame implements ActionListener {
-	private static startPage startPageInstance;
-	
-	public static startPage getInstance() {
-        if (startPageInstance == null)
-        	startPageInstance = new startPage("환영합니다!");
-
-        return startPageInstance;
-    }
-	
 	JPanel
 		jp_viewOfProjectName,
 		jp_insertMemberInfo,
@@ -756,11 +767,11 @@ class startPage extends JFrame implements ActionListener {
 		jb_loginBtn,
 		jb_signUpBtn;
 	
-	startPage(String Title) {
-		super(Title);
+	startPage(String title) {
+		super(title);
 		
 		jp_viewOfProjectName = new JPanel();
-		jl_projectName = new JLabel("My Own Textedit");
+		jl_projectName = new JLabel("My Own Text Edit");
 		jl_projectName.setFont(new Font("SansSerif", Font.BOLD, 19));
 		
 		jp_insertMemberInfo = new JPanel();
@@ -790,12 +801,12 @@ class startPage extends JFrame implements ActionListener {
         Toolkit tk = Toolkit.getDefaultToolkit();	// 구현된 Toolkit객체를 얻는다. 
         Dimension screenSize = tk.getScreenSize();	// 화면의 크기를 구한다.
         
-        setSize(300, 150);
+        setSize(450, 150);
         int x = screenSize.width / 2 - this.getWidth() / 2;  
         int y = screenSize.height / 2 - this.getHeight() / 2;  
                  
         setLocation(x, y);
-		setVisible(true);
+        setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -808,8 +819,15 @@ class startPage extends JFrame implements ActionListener {
 			String memberId = jtf_memberId.getText();
 			char[] memberPassArr = jpf_memberPass.getPassword();
 			String memberPass = new String(memberPassArr, 0, memberPassArr.length);
-			
 			boolean result = db_conn.isMemberCheck(memberId, memberPass);
+			
+			if ( memberId.length() == 0 || memberPass.length() == 0 ) {
+				JOptionPane.showMessageDialog(this,
+					    "ID나 PassWord를 입력해주세요!",
+					    "ID, Password 입력 오류",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			
 			if ( !result ) {
 				result = db_conn.isMemberCheck(memberId);
@@ -833,9 +851,8 @@ class startPage extends JFrame implements ActionListener {
 				
 				jtf_memberId.setText(null);;
 				jpf_memberPass.setText(null);
-				this.setVisible(false);
-				textEditPage textEdit = textEditPage.getInstance();
-				textEdit.setVisible(true);
+				this.dispose();
+				new textEditPage("제목 없음.txt");
 			}
 			
 			break;
@@ -843,24 +860,14 @@ class startPage extends JFrame implements ActionListener {
 		case "signUp":
 			jtf_memberId.setText(null);;
 			jpf_memberPass.setText(null);
-			this.setVisible(false);
-			signUpPage signUp = signUpPage.getInstance();
-			signUp.setVisible(true);
+			this.dispose();
+			new signUpPage("회원가입");
 			break;
 		}
 	}
 }
 
 class signUpPage extends JFrame implements ActionListener {
-	private static signUpPage signUpPageInstance;
-	
-	public static signUpPage getInstance() {
-        if (signUpPageInstance == null)
-        	signUpPageInstance = new signUpPage("회원가입");
-
-        return signUpPageInstance;
-    }
-	
 	JPanel
 		jp_title,
 		jp_info,
@@ -916,12 +923,12 @@ class signUpPage extends JFrame implements ActionListener {
         Toolkit tk = Toolkit.getDefaultToolkit();	// 구현된 Toolkit객체를 얻는다. 
         Dimension screenSize = tk.getScreenSize();	// 화면의 크기를 구한다.
         
-        setSize(400, 150);
+        setSize(450, 150);
         int x = screenSize.width / 2 - this.getWidth() / 2;  
         int y = screenSize.height / 2 - this.getHeight() / 2;  
                  
         setLocation(x, y);
-		setVisible(true);
+        setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -935,7 +942,6 @@ class signUpPage extends JFrame implements ActionListener {
 			char[] memberPassArr = jpf_insertPass.getPassword();
 			String memberPass = new String(memberPassArr, 0, memberPassArr.length);
 			memberPass.replaceAll("\u0020", "&nbsp;");
-			System.out.println(memberPass);
 			
 			if ( memberId.length() == 0 || memberPass.length() == 0 ) {
 				JOptionPane.showMessageDialog(this,
@@ -967,9 +973,8 @@ class signUpPage extends JFrame implements ActionListener {
 					
 					jtf_insertId.setText(null);
 					jpf_insertPass.setText(null);
-					this.setVisible(false);
-					startPage start = startPage.getInstance();
-					start.setVisible(true);
+					this.dispose();
+					new startPage("My Own Text Edit");
 				}
 			} else {
 				JOptionPane.showMessageDialog(this,
@@ -982,9 +987,8 @@ class signUpPage extends JFrame implements ActionListener {
 		case "previous":
 			jtf_insertId.setText(null);
 			jpf_insertPass.setText(null);
-			this.setVisible(false);
-			startPage start = startPage.getInstance();
-			start.setVisible(true);
+			this.dispose();
+			new startPage("My Own Text Edit");
 			break;
 		}
 	}
@@ -992,6 +996,6 @@ class signUpPage extends JFrame implements ActionListener {
 
 public class myOwnTextEdit {
 	public static void main(String[] args) {
-		startPage.getInstance();
+		new startPage("My Own Text Edit");
     }
 }

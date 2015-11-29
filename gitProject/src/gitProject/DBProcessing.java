@@ -38,7 +38,9 @@ public class DBProcessing {
 	
 	public void DBDisConnection() {
 		try {
-			db_conn.close();
+			if ( rs != null ) rs.close();
+			if ( pstmp != null ) pstmp.close();
+			if ( db_conn != null ) db_conn.close();
 			System.out.println("DB 연결 해제 성공!");
 		} catch (SQLException SQLe) {
 			System.out.println("DB 연결 해제 실패!");
@@ -57,10 +59,7 @@ public class DBProcessing {
 		try {
 			pstmp = db_conn.prepareStatement(sql);
 			rs    = pstmp.executeQuery();
-
-			if ( rs.isAfterLast() ) {
-				System.out.println(tableName + " Table 생성 성공!");
-			}
+			System.out.println(tableName + " Table 생성 성공!");
 		} catch (SQLException e) {
 			System.out.println("쿼리 수행 실패!");
 		}
