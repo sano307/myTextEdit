@@ -1,2 +1,5 @@
 # myTextEdit
-cyka
+
+JavaのSwingを基盤で作られたアプリケーションです。
+JDBCを利用して、MariaDBでアクセスできるLoginやJoin機能を作りました。
+簡単にテキストデータを扱うツールです。
